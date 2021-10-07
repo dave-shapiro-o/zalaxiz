@@ -1,11 +1,12 @@
 using System.Collections;
 using UnityEngine;
-using TMPro;
 using UnityEngine.SceneManagement;
-using System;
 
 public sealed class GameManager : MonoBehaviour
 {
+    public delegate void GameEventHandler();
+    public static event GameEventHandler StartScreen;
+
     public static GameObject player;
     public static SpawnManager spawnManager;
 
@@ -13,41 +14,21 @@ public sealed class GameManager : MonoBehaviour
     public static bool isPlayerAlive;
     public static bool isPowerUp;
     public static bool isBossFight;
-    public static GameObject powerUp; 
+    public static GameObject powerUp;
 
-    [SerializeField] private TextMeshProUGUI scoreText;
-    [SerializeField] private TextMeshProUGUI gameOverText;
-    [SerializeField] private TextMeshProUGUI titleText; 
-    [SerializeField] private TextMeshProUGUI hiScoreText;
+    private readonly int scoreValue = 30;
+    private int currentScore;
+    internal static int hiScore;
 
-    [SerializeField] private GameObject canvas; 
-    [SerializeField] private GameObject startButton;
-    [SerializeField] private GameObject lifeShip1;
-    [SerializeField] private GameObject lifeShip2;
-    [SerializeField] private GameObject lifeShip3;
-    [SerializeField] private GameObject livesDisplay;
-
-
-    [SerializeField] private int scoreValue;
-    [SerializeField] private int currentScore;
-    [SerializeField] private int lives;
-    private static int hiScore;
-    private static int bossHitCount = 20;
-
-    [SerializeField] private AudioSource gameMusic;
-    [SerializeField] private AudioSource gameOverMusic;
-    [SerializeField] private AudioSource bossFightMusic; 
-
-    [SerializeField] private AudioSource fxAudioSource;
-    [SerializeField] private AudioClip playerDeath;
-    [SerializeField] private AudioClip enemyDeath;
-    [SerializeField] private AudioClip powerUpAudio;
+    private int lives;
+    private int bossHitCount;
 
     [SerializeField] private ParticleSystem explosion;
     [SerializeField] private ParticleSystem bigExplosion;
 
-
-    public static GameManager sharedInstance; 
+    public static GameManager sharedInstance;
+    private new AudioManager audio;
+    private HudManager hud;
 
     private void Awake()
     {
@@ -57,29 +38,21 @@ public sealed class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        audio = AudioManager.sharedInstance;
+        hud = HudManager.sharedInstance;
+        lives = 3;
+        bossHitCount = 20;
         hiScore = PlayerPrefs.GetInt("hiScore");
-        StartScreen();
+        StartScreen?.Invoke();
     }
 
-    internal void BossFight()
-    {
-        gameMusic.gameObject.SetActive(false);
-        bossFightMusic.gameObject.SetActive(true);
-        isBossFight = true;
-    }
-
-    public void StartScreen()
+    public void OnStartScreen()
     {
         spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManager>();
 
         isGameOver = true;
-        gameOverMusic.gameObject.SetActive(true);
-        gameOverText.gameObject.SetActive(false);
-        hiScoreText.text = $"hi score: {hiScore}";
-        hiScoreText.gameObject.SetActive(true);
+        audio.Play("Game Over");
 
-        titleText.gameObject.SetActive(true);
-        startButton.SetActive(true);
         player = GameObject.FindGameObjectWithTag("Player");
         player.SetActive(false);
     }
@@ -88,23 +61,16 @@ public sealed class GameManager : MonoBehaviour
         isGameOver = false;
         player.SetActive(true);
         isPlayerAlive = true;
-        gameOverMusic.gameObject.SetActive(false);
-        hiScoreText.gameObject.SetActive(false);
-        gameMusic.gameObject.SetActive(true);
-        livesDisplay.SetActive(true);
-       
-        fxAudioSource = GetComponent<AudioSource>();
-        titleText.gameObject.SetActive(false);
-        startButton.SetActive(false);
+        audio.Stop("Game Over");
+        audio.Play("Game");
 
-        scoreText.text = "Score: 0";
+        hud.OnPlay();
     }
-    public void PowerUp(Collider pup)
+    public void OnPowerUp(Collider pup)
     {
         isPowerUp = true;
-        StartCoroutine(nameof(PowerUpTimer)); 
-        fxAudioSource.PlayOneShot(powerUpAudio);
-        Destroy(pup.gameObject);
+        StartCoroutine(nameof(PowerUpTimer));
+        Destroy(powerUp);
     }
     IEnumerator PowerUpTimer()
     {
@@ -112,24 +78,14 @@ public sealed class GameManager : MonoBehaviour
         isPowerUp = false;
     }
 
-    internal IEnumerator BossOnFire(Collider enemyCollider) 
+    internal void BossFight()
     {
-        while (enemyCollider.gameObject.activeInHierarchy)
-        {
-            explosion.transform.position = enemyCollider.gameObject.transform.position;
-            explosion.Play();
-            yield return new WaitForSeconds(0.5F);
-        }
-        
-    }
+        audio.Stop("Game");
+        audio.Play("Boss Fight");
+        isBossFight = true;
+    }  
 
-    public void UpdateScore(int value)
-    {
-        currentScore += value;
-        scoreText.text = "Score: " + currentScore;
-    }
-
-    public void EnemyHit(Collider enemyCollider)
+    public void OnEnemyHit(Collider enemyCollider)
     {
         explosion.transform.position = enemyCollider.gameObject.transform.position;
         explosion.Play();
@@ -140,46 +96,67 @@ public sealed class GameManager : MonoBehaviour
             {
                 bigExplosion.transform.position = enemyCollider.gameObject.transform.position;
                 bigExplosion.Play();
-                isBossFight = false;
+                if (isPlayerAlive) 
+                { 
+                    isBossFight = false;
+                    currentScore += scoreValue * 20;
+                    hud.UpdateScore(currentScore);
+                }
                 enemyCollider.gameObject.SetActive(false);
-                gameMusic.gameObject.SetActive(true);
-                bossFightMusic.gameObject.SetActive(false);
-                SpawnManager.enemyCount = 2;
-                spawnManager.StartInvoke();
-                fxAudioSource.PlayOneShot(playerDeath, 2.0f);
+                audio.Stop("Boss Fight");
+                audio.PlayFX("Player Death");
+                if (isPlayerAlive) { StartCoroutine(nameof(LevelComplete)); }
             }
             if (bossHitCount == 6) { StartCoroutine(BossOnFire(enemyCollider)); }
         }
         else 
         { 
             enemyCollider.gameObject.SetActive(false);
-            fxAudioSource.PlayOneShot(enemyDeath, 2.0f);
+            audio.PlayFX("Enemy Death");
         }
 
-        if (isPlayerAlive) { UpdateScore(scoreValue); }
+        if (isPlayerAlive) 
+        {
+            currentScore += scoreValue;
+            hud.UpdateScore(currentScore); 
+        }
     }
 
-    public void PlayerHit()
+    internal IEnumerator BossOnFire(Collider enemyCollider)
+    {
+        while (enemyCollider.gameObject.activeInHierarchy)
+        {
+            explosion.transform.position = enemyCollider.gameObject.transform.position;
+            explosion.Play();
+            yield return new WaitForSeconds(0.5F);
+        }
+    }
+
+    private IEnumerator LevelComplete()
+    {
+        audio.Play("Game Over");
+        hud.OnLevelComplete();
+        yield return new WaitForSeconds(4);
+        if (currentScore > hiScore) { hiScore = currentScore; }
+        PlayerPrefs.SetInt("hiScore", hiScore);
+        RestartGame();
+    }
+
+    public void OnPlayerHit(Collider other)
     {
         --lives;
-        explosion.transform.position = player.gameObject.transform.position;
-        gameMusic.gameObject.SetActive(false);
-        bossFightMusic.gameObject.SetActive(false);
-        fxAudioSource.PlayOneShot(playerDeath, 2.0f);
+        explosion.transform.position = player.transform.position;
+        audio.Stop("Game");
+        audio.Stop("Boss Fight");
+        audio.PlayFX("Player Death");
 
-        switch (lives)
-        {
-            case 2:
-                lifeShip1.SetActive(false);
-                break;
-            case 1:
-                lifeShip2.SetActive(false);
-                break;
-            case 0:
-                lifeShip3.SetActive(false);
-                StartCoroutine(GameOver());
-                return;
+        if (lives == 0) 
+        { 
+            StartCoroutine(nameof(GameOver));
+            return;
         }
+        hud.OnPlayerHit(lives);
+        
         OnLifeLost();
         StartCoroutine(nameof(PlayerNonFinalDeath));
     }
@@ -188,13 +165,13 @@ public sealed class GameManager : MonoBehaviour
     {
         isGameOver = true;
         OnLifeLost();
-        
-        fxAudioSource.PlayOneShot(playerDeath, 2.0f);
-        StartCoroutine(nameof(PlayerFinalExplosion));
-        gameMusic.gameObject.SetActive(false);
-        bossFightMusic.gameObject.SetActive(false);
-        gameOverText.gameObject.SetActive(true);
-        livesDisplay.SetActive(false);
+
+        audio.PlayFX("Player Death");
+        explosion.Play();
+        yield return new WaitForSeconds(2);
+        audio.Stop("Game");
+        audio.Stop("Boss Fight");
+        hud.OnGameOver();
        
         yield return new WaitForSeconds(4);
         if (currentScore > hiScore) { hiScore = currentScore; }
@@ -220,26 +197,37 @@ public sealed class GameManager : MonoBehaviour
         isPlayerAlive = true;
         if (!isBossFight)
         {
-            gameMusic.gameObject.SetActive(true);
+            audio.Play("Game");
             SpawnManager.enemyCount = SpawnManager.enemyCount - 2 > 2 ? SpawnManager.enemyCount - 2 : 2;
         }
         else 
-        { 
-            bossFightMusic.gameObject.SetActive(true);
-            SpawnManager.enemyCount = 13;   
+        {
+            audio.Play("Boss Fight");
+            SpawnManager.enemyCount = 13;
+            yield return new WaitForSeconds(1.5F);
+            bossHitCount = 20;
             spawnManager.ActivateEnemy("FirstLevelBoss", 1);
-        }
-        
+        }     
     }
 
-    private IEnumerator PlayerFinalExplosion()
-    {
-        explosion.Play();
-        yield return new WaitForSeconds(2);
-    }
-
-    public void RestartGame()
-    {
+    public void RestartGame() =>
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+    private void OnEnable()
+    {
+        Player.PoweredUp += OnPowerUp;
+        Player.PlayerHit += OnPlayerHit;
+        Player.EnemyHit += OnEnemyHit;
+        PlayerProjectile.EnemyHit += OnEnemyHit;
+        StartScreen += OnStartScreen;
+    }
+
+    private void OnDisable()
+    {
+        Player.PoweredUp -= OnPowerUp;
+        Player.PlayerHit -= OnPlayerHit;
+        Player.EnemyHit -= OnEnemyHit;
+        PlayerProjectile.EnemyHit -= OnEnemyHit;
+        StartScreen -= OnStartScreen;
     }
 }

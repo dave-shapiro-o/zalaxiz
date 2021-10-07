@@ -6,19 +6,15 @@ public class FirstLevelBoss : MonoBehaviour
     private readonly float enemySpeed = 0.02F;
     private readonly float bounds = 25;
 
-    [SerializeField] private GameObject enemyProjectilePrefab;
-    [SerializeField] private AudioClip enemyShoot;
-
     private Rigidbody enemyBody;
-    private AudioSource FxAudioSource;
-
+    private new AudioManager audio;
     public bool isOnFire;
 
     // Start is called before the first frame update
     void Start()
     {
+        audio = AudioManager.sharedInstance;
         enemyBody = gameObject.GetComponent<Rigidbody>();
-        FxAudioSource = GetComponent<AudioSource>();
     }
 
     private void OnEnable()
@@ -51,11 +47,9 @@ public class FirstLevelBoss : MonoBehaviour
     {
         if (gameObject.activeInHierarchy)
         {
+            audio.PlayFX("Boss Enemy Shoot");
             Quaternion shootRotation = transform.rotation * Quaternion.Euler(0, 180f, 0);
-            GameObject projectile = FirstBossProjectilePool.sharedInstance.GetPooledObject();
-            projectile.transform.SetPositionAndRotation(transform.position, shootRotation);
-            projectile.SetActive(true);
-            FxAudioSource.PlayOneShot(enemyShoot, 2.0f);
+            BossEnemyProjectile.Fire(transform.position, shootRotation);
         }      
     }
 

@@ -1,10 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FirstBossProjectilePool : MonoBehaviour
-{ 
-    public static FirstBossProjectilePool sharedInstance;
+public class TorpedoProjectilePool : MonoBehaviour
+{
+    public static TorpedoProjectilePool sharedInstance;
     private List<GameObject> projectilePool;
     [SerializeField] private GameObject projectile;
     [SerializeField] private int poolSize;

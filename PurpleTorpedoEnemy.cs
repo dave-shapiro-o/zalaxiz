@@ -6,19 +6,14 @@ public class PurpleTorpedoEnemy : MonoBehaviour
     private readonly float enemySpeed = 0.01F;
     private readonly float bounds = 25;
 
-    [SerializeField] private GameObject enemyProjectilePrefab;
-    [SerializeField] private AudioClip enemyShoot;
-          
     private Rigidbody enemyBody;
-    private Rigidbody enemyProjectileBody;
-    private AudioSource FxAudioSource;
+    private new AudioManager audio;
 
     // Start is called before the first frame update
     void Start()
     {
+        audio = AudioManager.sharedInstance;
         enemyBody = gameObject.GetComponent<Rigidbody>();
-        FxAudioSource = GetComponent<AudioSource>();
-        enemyProjectileBody = enemyProjectilePrefab.GetComponent<Rigidbody>();
     }
 
     private void OnEnable()
@@ -31,8 +26,8 @@ public class PurpleTorpedoEnemy : MonoBehaviour
         while (!GameManager.isGameOver)
         {
             yield return new WaitForSeconds(Random.Range(0, 4));
-            FxAudioSource.PlayOneShot(enemyShoot, 2.0f);
-            Instantiate(enemyProjectilePrefab, transform.position, enemyProjectileBody.transform.rotation);        
+            audio.PlayFX("Torpedo Enemy Shoot");
+            TorpedoEnemyProjectile.Fire(transform.position);
         }
 
     }

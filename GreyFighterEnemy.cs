@@ -6,21 +6,15 @@ public class GreyFighterEnemy : MonoBehaviour
     private readonly float enemySpeed = 0.01F;
     private readonly float bounds = 25;
 
-    [SerializeField] private GameObject enemyProjectilePrefab;
-    [SerializeField] private AudioClip enemyShoot;
-
     private Rigidbody enemyBody;
-    private Rigidbody enemyProjectileBody;
-    private AudioSource FxAudioSource;
-     
+    private new AudioManager audio;     
     private float currentX;
 
     // Start is called before the first frame update
     void Start()
     {
         enemyBody = gameObject.GetComponent<Rigidbody>();
-        FxAudioSource = GetComponent<AudioSource>();
-        enemyProjectileBody = enemyProjectilePrefab.GetComponent<Rigidbody>();
+        audio = AudioManager.sharedInstance;
     }
 
     private void OnEnable()
@@ -33,8 +27,9 @@ public class GreyFighterEnemy : MonoBehaviour
         while (!GameManager.isGameOver)
         {
             yield return new WaitForSeconds(Random.Range(0, 6));
-            FxAudioSource.PlayOneShot(enemyShoot, 2.0f);
-            Instantiate(enemyProjectilePrefab, transform.position, enemyProjectileBody.transform.rotation);                   
+            audio.PlayFX("Enemy Shoot");
+            EnemyProjectile.Fire(transform.position);
+            
         }
     }
     // Update is called once per frame
@@ -45,9 +40,10 @@ public class GreyFighterEnemy : MonoBehaviour
         {
             currentX = transform.position.x;
             enemyBody.AddForce((GameManager.player.transform.position - transform.position) * enemySpeed, ForceMode.Impulse);
-            if (transform.position.z < 0)
+            if (transform.position.z < 1)
             {
-                transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+                transform.position = new Vector3(transform.position.x, transform.position.y, 1);
+                enemyBody.AddForce(new Vector3(0, 0, 35) * enemySpeed, ForceMode.Impulse);
             }
             if (transform.position.z > bounds)
             {

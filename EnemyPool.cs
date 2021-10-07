@@ -10,7 +10,7 @@ public class EnemyPool : MonoBehaviour
     private static  List<GameObject> greyEnemyPool;
     private static List<GameObject> purpleTorpedoEnemyPool;
     private static List<GameObject> bossPool;
-    private static readonly int poolSize = 100;
+    private static readonly int poolSize = 40;
 
     [SerializeField] private GameObject greyEnemyPrefab;
     [SerializeField] private GameObject purpleTorpedoEnemyPrefab;

@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -23,7 +20,7 @@ public class SpawnManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        enemyCount = 13;
+        enemyCount = 2;
         StartInvoke();
     }
     internal void StartInvoke()
@@ -74,21 +71,22 @@ public class SpawnManager : MonoBehaviour
     {
         return type switch
         {
+            "GreyFighter" => new Vector3(Random.Range(-spawnRange, spawnRange), spawnY, enemySpawnZ),
             "PurpleTorpedo" => new Vector3(Random.Range(-spawnRange, spawnRange), spawnY, enemySpawnZ - 20),
-            "FirstLevelBoss" => new Vector3(0F, spawnY + 2F, enemySpawnZ),
+            "FirstLevelBoss" => new Vector3(0F, spawnY + 2F, enemySpawnZ + 200),
             _=> new Vector3(Random.Range(-spawnRange, spawnRange), spawnY, enemySpawnZ)
         };
     }
 
     private void SpawnPowerUp()
     {
-        if (!GameManager.isGameOver)
+        if (!GameManager.isGameOver && !GameManager.isPowerUp)
         {
             float randomPowerX = Random.Range(-spawnRange, spawnRange);
             float randomPowerZ = Random.Range(0, spawnRange);
 
             GameManager.powerUp = Instantiate(powerUpPrefab, new Vector3
-                (randomPowerX, 1F, randomPowerZ), greyFighterEnemyPrefab.transform.rotation);            
+                (randomPowerX, 1.5F, randomPowerZ), greyFighterEnemyPrefab.transform.rotation);            
         }                    
     }
 }

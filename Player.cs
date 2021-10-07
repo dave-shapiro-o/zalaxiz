@@ -1,22 +1,24 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private AudioClip playerShoot;
-    [SerializeField] private GameObject ProjectilePrefab;
-    
-    private AudioSource FxAudioSource;
-
+    public delegate void HitEventHandler(Collider collider);
+    public static event HitEventHandler PlayerHit;
+    public static event HitEventHandler EnemyHit;
+    public static event HitEventHandler PoweredUp;
+  
     private readonly float playerSpeed = 50;
     private readonly float bounds = 25;
+
+    private new AudioManager audio;
 
     // Start is called before the first frame update
     void Start()
     {
-        FxAudioSource = GetComponent<AudioSource>();
-        FxAudioSource.clip = playerShoot;
+        audio = AudioManager.sharedInstance;
     }
 
     // Update is called once per frame
@@ -36,8 +38,8 @@ public class Player : MonoBehaviour
     {
         float forwardInput = Input.GetAxis("Vertical");
         float sidewaysInput = Input.GetAxis("Horizontal");
-        transform.Translate(Vector3.forward * playerSpeed * Time.deltaTime * forwardInput);
-        transform.Translate(Vector3.right * playerSpeed * Time.deltaTime * sidewaysInput);
+        transform.Translate(forwardInput * playerSpeed * Time.deltaTime * Vector3.forward);
+        transform.Translate(playerSpeed * sidewaysInput * Time.deltaTime * Vector3.right);
         if (transform.position.z < 0)
         {
             transform.position = new Vector3(transform.position.x, transform.position.y, 0);
@@ -57,24 +59,25 @@ public class Player : MonoBehaviour
     }
     void Shoot()
     {
-        FxAudioSource.PlayOneShot(playerShoot, 2.0f);
-        GameObject projectile = PlayerProjectilePool.sharedInstance.GetPooledObject();
-        projectile.transform.position = transform.position;
-        projectile.SetActive(true);
+        audio.PlayFX("Player Shoot");
+        PlayerProjectile.Fire(transform.position);
     }
     
     private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.CompareTag("PowerUp"))
-        {
-            GameManager.sharedInstance.PowerUp(other);
-        }
-        
+    {   
         if (other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("BossEnemy"))
         {
-            GameManager.sharedInstance.PlayerHit();
-            GameManager.sharedInstance.EnemyHit(other);
-        }       
+            PlayerHit?.Invoke(other);
+            EnemyHit?.Invoke(other);
+        }   
+        if (other.gameObject.CompareTag("EnemyProjectile"))
+        {
+            PlayerHit?.Invoke(other);
+        }
+        if (other.gameObject.CompareTag("PowerUp"))
+        {
+            PoweredUp?.Invoke(other);
+        }
     }
    
     
