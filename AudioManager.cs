@@ -27,20 +27,6 @@ public class AudioManager : MonoBehaviour
         else { Destroy(gameObject); }
     }
 
-
-    private void OnEnable()
-    {
-        Player.PoweredUp += OnPowerUp;
-    } 
-    private void OnDisable()
-    {
-        Player.PoweredUp -= OnPowerUp;
-    }
-    private void OnPowerUp(Collider other)
-    {
-        PlayFX("Power Up");
-    }
-
     internal void Play(string title, bool on = true)
     {
         AudioSource music = title switch
@@ -52,10 +38,9 @@ public class AudioManager : MonoBehaviour
         };
          music.gameObject.SetActive(on); 
     }
+
     internal void Stop(string title)
-    {
-        Play(title, false);
-    }
+        => Play(title, false);
 
     internal void PlayFX(string sound)
     {
@@ -72,4 +57,81 @@ public class AudioManager : MonoBehaviour
         };
         if(clip != null) { fxAudioSource.PlayOneShot(clip); }        
     }
+    private void OnStartScreen()
+        => Play("Game Over");
+
+    private void OnPlay()
+    {
+        Stop("Game Over");
+        Play("Game");
+    }
+
+    private void OnPowerUp(Collider other)
+        => PlayFX("Power Up");
+
+    private void OnPlayerHit(Collider collider)
+    {
+        Stop("Game");
+        Stop("Boss Fight");
+        PlayFX("Player Death");
+    }
+
+    private void OnEnemyHit(Collider collider)
+        => PlayFX("Enemy Death");
+
+    private void OnBossFight()
+    {
+        Stop("Game");
+        Play("Boss Fight");
+    }
+
+    private void OnAllLivesLost()
+    {
+        Stop("Game");
+        Stop("Boss Fight");
+    }
+
+    private void OnContinue()
+        => Play("Game");
+
+    private void OnBossDied(Collider collider)
+        => PlayFX("Player Death");
+
+    private void OnLevelComplete()
+        => Play("Game Over");
+
+    private void OnEnable()
+    {
+        Player.PoweredUp += OnPowerUp;
+        Player.PlayerHit += OnPlayerHit;
+        Player.EnemyHit += OnEnemyHit;
+        PlayerProjectile.EnemyHit += OnEnemyHit;
+        PlayerProjectile.BossEnemyHit += OnEnemyHit;
+        GameManager.StartScreen += OnStartScreen;
+        GameManager.AllLivesLost += OnAllLivesLost;
+        GameManager.PlayGame += OnPlay;
+        GameManager.Continue += OnContinue;
+        GameManager.ContinueBossFight += OnBossFight;
+        GameManager.BossDied += OnBossDied;
+        GameManager.LevelComplete += OnLevelComplete;
+        SpawnManager.BossFight += OnBossFight;
+    }
+
+    private void OnDisable()
+    {
+        Player.PoweredUp -= OnPowerUp;
+        Player.PlayerHit -= OnPlayerHit;
+        Player.EnemyHit -= OnEnemyHit;
+        PlayerProjectile.EnemyHit -= OnEnemyHit;
+        PlayerProjectile.BossEnemyHit -= OnEnemyHit;
+        GameManager.StartScreen -= OnStartScreen;
+        GameManager.AllLivesLost -= OnAllLivesLost;
+        GameManager.PlayGame -= OnPlay;
+        GameManager.Continue -= OnContinue;
+        GameManager.ContinueBossFight -= OnBossFight;
+        GameManager.BossDied -= OnBossDied;
+        GameManager.LevelComplete -= OnLevelComplete;
+        SpawnManager.BossFight -= OnBossFight;
+    }
+
 }

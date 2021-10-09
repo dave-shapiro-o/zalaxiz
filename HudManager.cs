@@ -25,20 +25,8 @@ public class HudManager : MonoBehaviour
 
     private void Awake()
     {
-        if (sharedInstance == null)
-        {
-            sharedInstance = this;
-        }
+        if (!sharedInstance) { sharedInstance = this; }
         else { Destroy(gameObject); }
-    }
-    private void OnEnable()
-    {
-        GameManager.StartScreen += OnStartScreen;
-    }
-
-    private void OnDisable()
-    {
-        GameManager.StartScreen -= OnStartScreen;
     }
 
     internal void OnStartScreen()
@@ -57,17 +45,14 @@ public class HudManager : MonoBehaviour
         scoreText.text = "Score: " + currentScore;
     }
 
-    internal void OnGameOver()
+    internal void OnAllLivesLost()
     {
         gameOverText.gameObject.SetActive(true);
         livesDisplay.SetActive(false);
     }
-
     
-    internal void OnLevelComplete()
-    {
-        levelCompleteText.gameObject.SetActive(true);
-    }
+    internal void OnLevelComplete() 
+        => levelCompleteText.gameObject.SetActive(true);
 
     internal void OnPlay()
     {
@@ -77,19 +62,37 @@ public class HudManager : MonoBehaviour
         startButton.SetActive(false);
         scoreText.text = "Score: 0";
     }
-    internal void OnPlayerHit(int lives)
+    internal void OnPlayerHit(Collider collider)
     {
-        switch (lives)
+        switch (GameManager.lives)
         {
-            case 2:
+            case 3:
                 lifeShip1.SetActive(false);
                 break;
-            case 1:
+            case 2:
                 lifeShip2.SetActive(false);
                 break;
-            case 0:
+            case 1:
                 lifeShip3.SetActive(false);
                 break;
         }
+    }
+
+    private void OnEnable()
+    {
+        Player.PlayerHit += OnPlayerHit;
+        GameManager.StartScreen += OnStartScreen;
+        GameManager.AllLivesLost += OnAllLivesLost;
+        GameManager.PlayGame += OnPlay;
+        GameManager.LevelComplete += OnLevelComplete;
+    }
+
+    private void OnDisable()
+    {
+        Player.PlayerHit -= OnPlayerHit;
+        GameManager.StartScreen -= OnStartScreen;
+        GameManager.AllLivesLost -= OnAllLivesLost;
+        GameManager.PlayGame -= OnPlay;
+        GameManager.LevelComplete -= OnLevelComplete;
     }
 }

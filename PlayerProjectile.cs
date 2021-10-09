@@ -7,6 +7,7 @@ public class PlayerProjectile : MonoBehaviour
 {
     public delegate void HitEventHandler(Collider collider);
     public static event HitEventHandler EnemyHit;
+    public static event HitEventHandler BossEnemyHit; 
 
     private readonly float ProjectileSpeed = 30.0f;
 
@@ -21,11 +22,15 @@ public class PlayerProjectile : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("BossEnemy"))
+        if (other.gameObject.CompareTag("Enemy"))
         {
             EnemyHit?.Invoke(other);
             gameObject.SetActive(false);
         }
+        if (other.gameObject.CompareTag("BossEnemy"))
+        {
+            BossEnemyHit?.Invoke(other);
+        }                 
     }
 
     internal static void Fire(Vector3 playerPosition)

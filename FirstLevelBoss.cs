@@ -8,7 +8,6 @@ public class FirstLevelBoss : MonoBehaviour
 
     private Rigidbody enemyBody;
     private new AudioManager audio;
-    public bool isOnFire;
 
     // Start is called before the first frame update
     void Start()
@@ -32,7 +31,7 @@ public class FirstLevelBoss : MonoBehaviour
                 yield return new WaitForSeconds(Random.Range(0, 1F));
                 Fire();
             }
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(Random.Range(0, 1F));
             i = 0;
             while (i++ < 100)
             {

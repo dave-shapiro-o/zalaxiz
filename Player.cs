@@ -8,13 +8,20 @@ public class Player : MonoBehaviour
     public delegate void HitEventHandler(Collider collider);
     public static event HitEventHandler PlayerHit;
     public static event HitEventHandler EnemyHit;
+    public static event HitEventHandler BossEnemyHit;
     public static event HitEventHandler PoweredUp;
   
-    private readonly float playerSpeed = 50;
+    private readonly float playerSpeed = 75;
     private readonly float bounds = 25;
 
     private new AudioManager audio;
+    public static Player sharedInstance;
 
+    private void Awake()
+    {
+        if (!sharedInstance) { sharedInstance = this; }
+        else { Destroy(gameObject); }
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -65,21 +72,22 @@ public class Player : MonoBehaviour
     
     private void OnTriggerEnter(Collider other)
     {   
-        if (other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("BossEnemy"))
+        if (other.gameObject.CompareTag("Enemy")) 
         {
-            PlayerHit?.Invoke(other);
+            PlayerHit?.Invoke(GetComponent<Collider>());
             EnemyHit?.Invoke(other);
         }   
+        if (other.gameObject.CompareTag("BossEnemy"))
+        {
+            BossEnemyHit?.Invoke(other);
+        }
         if (other.gameObject.CompareTag("EnemyProjectile"))
         {
-            PlayerHit?.Invoke(other);
+            PlayerHit?.Invoke(GetComponent<Collider>());
         }
         if (other.gameObject.CompareTag("PowerUp"))
         {
             PoweredUp?.Invoke(other);
         }
-    }
-   
-    
-    
+    }   
 }

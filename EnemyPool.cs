@@ -35,6 +35,7 @@ public class EnemyPool : MonoBehaviour
                CreateEnemy("PurpleTorpedo"); 
         }
         CreateEnemy("FirstLevelBoss");
+        //CreateEnemy("FirstLevelBoss");
     }
 
     private void CreateEnemy(string type)

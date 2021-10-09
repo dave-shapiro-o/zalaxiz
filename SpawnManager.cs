@@ -3,30 +3,52 @@ using Random = UnityEngine.Random;
 
 public class SpawnManager : MonoBehaviour
 {
+    public delegate void BossFightEventHandler();
+    public static event BossFightEventHandler BossFight;
+
     [SerializeField] private GameObject greyFighterEnemyPrefab;
     [SerializeField] private GameObject greenTorpedoEnemyPrefab;
     [SerializeField] private GameObject powerUpPrefab;
-
 
     private readonly float spawnRange = 25F;
     private readonly float spawnY = 0.5F;
     private readonly float startDelay = 1F;
     private readonly float enemySpawnZ = 40F;
     private readonly float spawnDelay = 5F;
+    private readonly float powerUpStartDelay = 15F;
     private readonly float powerUpDelay = 30F;
 
     public static int enemyCount;
+    public static SpawnManager sharedInstance;
+
+    private void Awake()
+    {
+        if (!sharedInstance) { sharedInstance = this; }
+        else { Destroy(gameObject); }
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         enemyCount = 2;
+        CreatePowerUp();
         StartInvoke();
     }
+
+    private void CreatePowerUp()
+    {
+        float randomPowerX = Random.Range(-spawnRange, spawnRange);
+        float randomPowerZ = Random.Range(0, spawnRange);
+
+        GameManager.powerUp = Instantiate(powerUpPrefab, new Vector3
+            (randomPowerX, 1.5F, randomPowerZ), Quaternion.identity);
+        GameManager.powerUp.SetActive(false);
+    }
+
     internal void StartInvoke()
     {
         InvokeRepeating(nameof(SpawnEnemy), startDelay, spawnDelay);
-        InvokeRepeating(nameof(SpawnPowerUp), startDelay, powerUpDelay);
+        InvokeRepeating(nameof(SpawnPowerUp), powerUpStartDelay, powerUpDelay);
     }
 
     private void SpawnEnemy()
@@ -49,8 +71,8 @@ public class SpawnManager : MonoBehaviour
             else 
             {
                 CancelInvoke();
-                GameManager.sharedInstance.BossFight();
                 ActivateEnemy("FirstLevelBoss", 1);
+                BossFight?.Invoke();
             }
         }      
     }
@@ -85,8 +107,30 @@ public class SpawnManager : MonoBehaviour
             float randomPowerX = Random.Range(-spawnRange, spawnRange);
             float randomPowerZ = Random.Range(0, spawnRange);
 
-            GameManager.powerUp = Instantiate(powerUpPrefab, new Vector3
-                (randomPowerX, 1.5F, randomPowerZ), greyFighterEnemyPrefab.transform.rotation);            
-        }                    
+            GameManager.powerUp.SetActive(true);
+            GameManager.powerUp.transform.position =  new Vector3 (randomPowerX, 1.5F, randomPowerZ);
+        }
+    }
+
+    private void OnContinue()
+        => enemyCount = enemyCount - 2 > 2 ? enemyCount - 2 : 2;
+
+     
+    private void OnContinueBossFight()
+    {
+        enemyCount = 13;
+        ActivateEnemy("FirstLevelBoss", 1);
+    }
+
+    private void OnEnable()
+    {
+        GameManager.Continue += OnContinue;
+        GameManager.ContinueBossFight += OnContinueBossFight;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.Continue -= OnContinue;
+        GameManager.ContinueBossFight -= OnContinueBossFight;
     }
 }
