@@ -50,10 +50,15 @@ public class HudManager : MonoBehaviour
         gameOverText.gameObject.SetActive(true);
         livesDisplay.SetActive(false);
     }
-    
-    internal void OnLevelComplete() 
-        => levelCompleteText.gameObject.SetActive(true);
 
+    internal void OnLevelComplete()
+    {
+        if (GameManager.isPlayerAlive) 
+        { 
+            levelCompleteText.gameObject.SetActive(true); 
+        }
+    }
+        
     internal void OnPlay()
     {
         hiScoreText.gameObject.SetActive(false);

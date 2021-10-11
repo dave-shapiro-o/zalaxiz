@@ -14,7 +14,7 @@ public class SFXManager : MonoBehaviour
         if(!sharedInstance) { sharedInstance = this; }
         else { Destroy(gameObject); }
     }
-
+    
     internal void Explosion(ParticleSystem explosion, Collider collider)
     {
         explosion.transform.position = collider.transform.position;
