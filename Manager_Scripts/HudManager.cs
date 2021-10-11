@@ -67,6 +67,7 @@ public class HudManager : MonoBehaviour
         startButton.SetActive(false);
         scoreText.text = "Score: 0";
     }
+    
     internal void OnPlayerHit(Collider collider)
     {
         switch (GameManager.lives)
