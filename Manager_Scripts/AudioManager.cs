@@ -66,7 +66,7 @@ public class AudioManager : MonoBehaviour
         Play("Game");
     }
 
-    private void OnPowerUp(Collider other)
+    private void OnPowerUp()
         => PlayFX("Power Up");
 
     private void OnPlayerHit(Collider collider)
@@ -98,7 +98,10 @@ public class AudioManager : MonoBehaviour
         => PlayFX("Player Death");
 
     private void OnLevelComplete()
-        => Play("Game Over");
+    {
+        Play("Game Over");
+        Stop("Boss Fight");
+    }
 
     private void OnEnable()
     {

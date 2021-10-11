@@ -25,7 +25,6 @@ public sealed class GameManager : MonoBehaviour
     public static bool isPlayerAlive;
     public static bool isPowerUp;
     public static bool isBossFight;
-    public static GameObject powerUp;
 
     private readonly int scoreValue = 30;
     private int currentScore;
@@ -45,6 +44,7 @@ public sealed class GameManager : MonoBehaviour
     void Start()
     {
         hud = HudManager.sharedInstance;
+
         bossHitCount = 0;
         lives = 3;
         hiScore = PlayerPrefs.GetInt("hiScore");
@@ -65,13 +65,12 @@ public sealed class GameManager : MonoBehaviour
         isPlayerAlive = true;
     }
 
-    public void OnPowerUp(Collider pup)
+    public void OnPowerUp()
     {
         if (!isPowerUp)
         {
             isPowerUp = true;
             StartCoroutine(nameof(PowerUpTimer));
-            powerUp.SetActive(false);
         }     
     }
 
@@ -134,7 +133,6 @@ public sealed class GameManager : MonoBehaviour
         --lives;
         isPlayerAlive = false;
         player.SetActive(false);
-        powerUp.SetActive(false);
         isPowerUp = false;
 
         if (lives == 0) 
@@ -162,7 +160,6 @@ public sealed class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(4);
         player.SetActive(true);
-        player = GameObject.FindGameObjectWithTag("Player");
         player.transform.position = new Vector3(0, 0, 0);
         isPlayerAlive = true;
 

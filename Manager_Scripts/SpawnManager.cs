@@ -17,6 +17,7 @@ public class SpawnManager : MonoBehaviour
     private readonly float spawnDelay = 5F;
     private readonly float powerUpStartDelay = 15F;
     private readonly float powerUpDelay = 30F;
+    public GameObject powerUp;
 
     public static int enemyCount;
     public static SpawnManager sharedInstance;
@@ -40,11 +41,14 @@ public class SpawnManager : MonoBehaviour
         float randomPowerX = Random.Range(-spawnRange, spawnRange);
         float randomPowerZ = Random.Range(0, spawnRange);
 
-        GameManager.powerUp = Instantiate(powerUpPrefab, new Vector3
+        powerUp = Instantiate(powerUpPrefab, new Vector3
             (randomPowerX, 1.5F, randomPowerZ), Quaternion.identity);
-        GameManager.powerUp.SetActive(false);
+        powerUp.SetActive(false);
     }
-
+    internal void DeactivatePowerUp()
+    { 
+        powerUp.SetActive(false);
+    } 
     internal void StartInvoke()
     {
         InvokeRepeating(nameof(SpawnEnemy), startDelay, spawnDelay);
@@ -107,8 +111,8 @@ public class SpawnManager : MonoBehaviour
             float randomPowerX = Random.Range(-spawnRange, spawnRange);
             float randomPowerZ = Random.Range(0, spawnRange);
 
-            GameManager.powerUp.SetActive(true);
-            GameManager.powerUp.transform.position =  new Vector3 (randomPowerX, 1.5F, randomPowerZ);
+            powerUp.SetActive(true);
+            powerUp.transform.position =  new Vector3 (randomPowerX, 1.5F, randomPowerZ);
         }
     }
 
@@ -124,12 +128,16 @@ public class SpawnManager : MonoBehaviour
 
     private void OnEnable()
     {
+        Player.PoweredUp += DeactivatePowerUp;
+        GameManager.LifeLost += DeactivatePowerUp;
         GameManager.Continue += OnContinue;
         GameManager.ContinueBossFight += OnContinueBossFight;
     }
 
     private void OnDisable()
     {
+        Player.PoweredUp -= DeactivatePowerUp;
+        GameManager.LifeLost -= DeactivatePowerUp;
         GameManager.Continue -= OnContinue;
         GameManager.ContinueBossFight -= OnContinueBossFight;
     }
