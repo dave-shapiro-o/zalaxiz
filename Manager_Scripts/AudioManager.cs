@@ -57,47 +57,44 @@ public class AudioManager : MonoBehaviour
         };
         if(clip != null) { fxAudioSource.PlayOneShot(clip); }        
     }
-    private void OnStartScreen()
+    private void PlayStartScreenMusic()
         => Play("Game Over");
 
-    private void OnPlay()
+    private void PlayGameMusic()
     {
         Stop("Game Over");
         Play("Game");
     }
 
-    private void OnPowerUp()
+    private void PlayPowerUp()
         => PlayFX("Power Up");
 
-    private void OnPlayerHit(Collider collider)
+    private void PlayPlayerHit(Collider collider)
     {
         Stop("Game");
         Stop("Boss Fight");
         PlayFX("Player Death");
     }
 
-    private void OnEnemyHit(Collider collider)
+    private void PlayEnemyHit(Collider collider)
         => PlayFX("Enemy Death");
 
-    private void OnBossFight()
+    private void PlayBossFightMusic()
     {
         Stop("Game");
         Play("Boss Fight");
     }
 
-    private void OnAllLivesLost()
+    private void AllLivesAreLost()
     {
         Stop("Game");
         Stop("Boss Fight");
     }
 
-    private void OnContinue()
-        => Play("Game");
-
-    private void OnBossDied(Collider collider)
+    private void PlayBossDead(Collider collider)
         => PlayFX("Player Death");
 
-    private void OnLevelComplete()
+    private void LevelIsComplete()
     {
         Play("Game Over");
         Stop("Boss Fight");
@@ -105,36 +102,36 @@ public class AudioManager : MonoBehaviour
 
     private void OnEnable()
     {
-        Player.PoweredUp += OnPowerUp;
-        Player.PlayerHit += OnPlayerHit;
-        Player.EnemyHit += OnEnemyHit;
-        PlayerProjectile.EnemyHit += OnEnemyHit;
-        PlayerProjectile.BossEnemyHit += OnEnemyHit;
-        GameManager.StartScreen += OnStartScreen;
-        GameManager.AllLivesLost += OnAllLivesLost;
-        GameManager.PlayGame += OnPlay;
-        GameManager.Continue += OnContinue;
-        GameManager.ContinueBossFight += OnBossFight;
-        GameManager.BossDied += OnBossDied;
-        GameManager.LevelComplete += OnLevelComplete;
-        SpawnManager.BossFight += OnBossFight;
+        Player.PoweredUp += PlayPowerUp;
+        Player.PlayerHit += PlayPlayerHit;
+        Player.EnemyHit += PlayEnemyHit;
+        PlayerProjectile.EnemyHit += PlayEnemyHit;
+        PlayerProjectile.BossEnemyHit += PlayEnemyHit;
+        GameManager.StartScreen += PlayStartScreenMusic;
+        GameManager.AllLivesLost += AllLivesAreLost;
+        GameManager.PlayGame += PlayGameMusic;
+        GameManager.Continue += PlayGameMusic;
+        GameManager.ContinueBossFight += PlayBossFightMusic;
+        GameManager.BossDied += PlayBossDead;
+        GameManager.LevelComplete += LevelIsComplete;
+        SpawnManager.BossFight += PlayBossFightMusic;
     }
 
     private void OnDisable()
     {
-        Player.PoweredUp -= OnPowerUp;
-        Player.PlayerHit -= OnPlayerHit;
-        Player.EnemyHit -= OnEnemyHit;
-        PlayerProjectile.EnemyHit -= OnEnemyHit;
-        PlayerProjectile.BossEnemyHit -= OnEnemyHit;
-        GameManager.StartScreen -= OnStartScreen;
-        GameManager.AllLivesLost -= OnAllLivesLost;
-        GameManager.PlayGame -= OnPlay;
-        GameManager.Continue -= OnContinue;
-        GameManager.ContinueBossFight -= OnBossFight;
-        GameManager.BossDied -= OnBossDied;
-        GameManager.LevelComplete -= OnLevelComplete;
-        SpawnManager.BossFight -= OnBossFight;
+        Player.PoweredUp -= PlayPowerUp;
+        Player.PlayerHit -= PlayPlayerHit;
+        Player.EnemyHit -= PlayEnemyHit;
+        PlayerProjectile.EnemyHit -= PlayEnemyHit;
+        PlayerProjectile.BossEnemyHit -= PlayEnemyHit;
+        GameManager.StartScreen -= PlayStartScreenMusic;
+        GameManager.AllLivesLost -= AllLivesAreLost;
+        GameManager.PlayGame -= PlayGameMusic;
+        GameManager.Continue -= PlayGameMusic;
+        GameManager.ContinueBossFight -= PlayBossFightMusic;
+        GameManager.BossDied -= PlayBossDead;
+        GameManager.LevelComplete -= LevelIsComplete;
+        SpawnManager.BossFight -= PlayBossFightMusic;
     }
 
 }

@@ -28,7 +28,7 @@ public class PlayerProjectilePool : MonoBehaviour
         }
     }
 
-    public GameObject GetPooledObject()
+    internal GameObject GetPooledObject()
     {
         for (int i = 0; i < poolSize; ++i)
         {

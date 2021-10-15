@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 public class EnemyPool : MonoBehaviour
 {
     public static EnemyPool sharedInstance;
+
     private static  List<GameObject> greyEnemyPool;
     private static List<GameObject> purpleTorpedoEnemyPool;
     private static List<GameObject> bossPool;

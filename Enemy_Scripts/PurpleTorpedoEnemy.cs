@@ -21,15 +21,17 @@ public class PurpleTorpedoEnemy : MonoBehaviour
         StartCoroutine(Shoot());
     }
 
-    IEnumerator Shoot()
+    private IEnumerator Shoot()
     {
         while (!GameManager.isGameOver)
         {
             yield return new WaitForSeconds(Random.Range(0, 4));
-            audio.PlayFX("Torpedo Enemy Shoot");
-            TorpedoEnemyProjectile.Fire(transform.position);
+            if (GameManager.isPlayerAlive)
+            {
+                audio.PlayFX("Torpedo Enemy Shoot");
+                TorpedoEnemyProjectile.Fire(transform.position);
+            }           
         }
-
     }
     // Update is called once per frame
     void FixedUpdate()

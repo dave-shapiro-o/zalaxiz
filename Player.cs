@@ -6,12 +6,12 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     public delegate void HitEventHandler(Collider collider);
-    public delegate void PowerUpEventHandler();
 
     public static event HitEventHandler PlayerHit;
     public static event HitEventHandler EnemyHit;
     public static event HitEventHandler BossEnemyHit;
-    public static event PowerUpEventHandler PoweredUp;
+
+    public static event Action PoweredUp;
   
     private readonly float playerSpeed = 75;
     private readonly float bounds = 25;

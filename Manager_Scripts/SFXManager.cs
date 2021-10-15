@@ -15,28 +15,22 @@ public class SFXManager : MonoBehaviour
         else { Destroy(gameObject); }
     }
     
-    internal void Explosion(ParticleSystem explosion, Collider collider)
+    private void Explosion(ParticleSystem explosion, Collider collider)
     {
         explosion.transform.position = collider.transform.position;
         explosion.Play();
     }
 
-    internal void SmallExplosion(Collider collider)
+    private void SmallExplosion(Collider collider)
         => Explosion(smallExplosion, collider);
 
-    internal void BigExplosion(Collider collider)
+    private void BigExplosion(Collider collider)
         => Explosion(bigExplosion, collider);        
 
-    private void OnPlayerHit(Collider collider)
-        => SmallExplosion(collider);
-
-    private void OnEnemyHit(Collider collider)
-        => SmallExplosion(collider);
-
-    private void OnBossOnFire(Collider collider)
+    private void BossOnFireExplosions(Collider collider)
         => StartCoroutine(nameof(WhileBossIsOnFire), collider);
 
-    internal IEnumerator WhileBossIsOnFire(Collider bossCollider)
+    private IEnumerator WhileBossIsOnFire(Collider bossCollider)
     {
         while (bossCollider.gameObject.activeInHierarchy)
         {
@@ -45,19 +39,13 @@ public class SFXManager : MonoBehaviour
         }
     }
 
-    private void OnBossEnemyHit(Collider collider)
-        => SmallExplosion(collider);
-
-    private void OnBossDied(Collider bossCollider)
-        => BigExplosion(bossCollider);
-
     private void OnEnable()
     {
         Player.PlayerHit += SmallExplosion;
         Player.EnemyHit += SmallExplosion;
         PlayerProjectile.EnemyHit += SmallExplosion;
         PlayerProjectile.BossEnemyHit += SmallExplosion;
-        GameManager.BossOnFire += OnBossOnFire;
+        GameManager.BossOnFire += BossOnFireExplosions;
         GameManager.BossDied += BigExplosion;
     }
 
@@ -67,7 +55,7 @@ public class SFXManager : MonoBehaviour
         Player.EnemyHit -= SmallExplosion;
         PlayerProjectile.EnemyHit -= SmallExplosion;
         PlayerProjectile.BossEnemyHit -= SmallExplosion;
-        GameManager.BossOnFire -= OnBossOnFire;
+        GameManager.BossOnFire -= BossOnFireExplosions;
         GameManager.BossDied -= BigExplosion;
     }
 }

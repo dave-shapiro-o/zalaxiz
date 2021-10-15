@@ -1,10 +1,10 @@
+using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class SpawnManager : MonoBehaviour
 {
-    public delegate void BossFightEventHandler();
-    public static event BossFightEventHandler BossFight;
+    public static event Action BossFight;
 
     [SerializeField] private GameObject greyFighterEnemyPrefab;
     [SerializeField] private GameObject greenTorpedoEnemyPrefab;
@@ -17,9 +17,10 @@ public class SpawnManager : MonoBehaviour
     private readonly float spawnDelay = 5F;
     private readonly float powerUpStartDelay = 15F;
     private readonly float powerUpDelay = 30F;
-    public GameObject powerUp;
+    private static int enemyCount;
 
-    public static int enemyCount;
+    private GameObject powerUp;
+
     public static SpawnManager sharedInstance;
 
     private void Awake()
@@ -116,11 +117,11 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
-    private void OnContinue()
+    private void ResetEnemyCountWhenLifeLost()
         => enemyCount = enemyCount - 2 > 2 ? enemyCount - 2 : 2;
 
      
-    private void OnContinueBossFight()
+    private void RestartBossFight()
     {
         enemyCount = 13;
         ActivateEnemy("FirstLevelBoss", 1);
@@ -130,15 +131,15 @@ public class SpawnManager : MonoBehaviour
     {
         Player.PoweredUp += DeactivatePowerUp;
         GameManager.LifeLost += DeactivatePowerUp;
-        GameManager.Continue += OnContinue;
-        GameManager.ContinueBossFight += OnContinueBossFight;
+        GameManager.Continue += ResetEnemyCountWhenLifeLost;
+        GameManager.ContinueBossFight += RestartBossFight;
     }
 
     private void OnDisable()
     {
         Player.PoweredUp -= DeactivatePowerUp;
         GameManager.LifeLost -= DeactivatePowerUp;
-        GameManager.Continue -= OnContinue;
-        GameManager.ContinueBossFight -= OnContinueBossFight;
+        GameManager.Continue -= ResetEnemyCountWhenLifeLost;
+        GameManager.ContinueBossFight -= RestartBossFight;
     }
 }

@@ -4,7 +4,9 @@ using UnityEngine;
 public class GreyEnemyProjectilePool : MonoBehaviour
 {
     public static GreyEnemyProjectilePool sharedInstance;
+
     private List<GameObject> projectilePool;
+
     [SerializeField] private GameObject projectile;
     [SerializeField] private int poolSize;
 
@@ -27,7 +29,7 @@ public class GreyEnemyProjectilePool : MonoBehaviour
         }
     }
 
-    public GameObject GetPooledObject()
+    internal GameObject GetPooledObject()
     {
         for (int i = 0; i < poolSize; ++i)
         {

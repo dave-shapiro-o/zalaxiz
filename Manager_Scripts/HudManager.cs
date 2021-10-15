@@ -29,7 +29,7 @@ public class HudManager : MonoBehaviour
         else { Destroy(gameObject); }
     }
 
-    internal void OnStartScreen()
+    private void ActivateStartScreen()
     {
         gameOverText.gameObject.SetActive(false);
         hiScoreText.text = $"hi score: {GameManager.hiScore}";
@@ -45,13 +45,13 @@ public class HudManager : MonoBehaviour
         scoreText.text = "Score: " + currentScore;
     }
 
-    internal void OnAllLivesLost()
+    private void ActivateGameOverScreen()
     {
         gameOverText.gameObject.SetActive(true);
         livesDisplay.SetActive(false);
     }
 
-    internal void OnLevelComplete()
+    private void ActivateLevelCompleteScreen()
     {
         if (GameManager.isPlayerAlive) 
         { 
@@ -59,7 +59,7 @@ public class HudManager : MonoBehaviour
         }
     }
         
-    internal void OnPlay()
+    private void ActivatePlayScreen()
     {
         hiScoreText.gameObject.SetActive(false);
         livesDisplay.SetActive(true);
@@ -67,8 +67,7 @@ public class HudManager : MonoBehaviour
         startButton.SetActive(false);
         scoreText.text = "Score: 0";
     }
-    
-    internal void OnPlayerHit(Collider collider)
+    private void RemoveLifeShip(Collider collider)
     {
         switch (GameManager.lives)
         {
@@ -86,19 +85,19 @@ public class HudManager : MonoBehaviour
 
     private void OnEnable()
     {
-        Player.PlayerHit += OnPlayerHit;
-        GameManager.StartScreen += OnStartScreen;
-        GameManager.AllLivesLost += OnAllLivesLost;
-        GameManager.PlayGame += OnPlay;
-        GameManager.LevelComplete += OnLevelComplete;
+        Player.PlayerHit += RemoveLifeShip;
+        GameManager.StartScreen += ActivateStartScreen;
+        GameManager.AllLivesLost += ActivateGameOverScreen;
+        GameManager.PlayGame += ActivatePlayScreen;
+        GameManager.LevelComplete += ActivateLevelCompleteScreen;
     }
 
     private void OnDisable()
     {
-        Player.PlayerHit -= OnPlayerHit;
-        GameManager.StartScreen -= OnStartScreen;
-        GameManager.AllLivesLost -= OnAllLivesLost;
-        GameManager.PlayGame -= OnPlay;
-        GameManager.LevelComplete -= OnLevelComplete;
+        Player.PlayerHit -= RemoveLifeShip;
+        GameManager.StartScreen -= ActivateStartScreen;
+        GameManager.AllLivesLost -= ActivateGameOverScreen;
+        GameManager.PlayGame -= ActivatePlayScreen;
+        GameManager.LevelComplete -= ActivateLevelCompleteScreen;
     }
 }

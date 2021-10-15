@@ -21,7 +21,7 @@ public class FirstLevelBoss : MonoBehaviour
         StartCoroutine(Shoot());
     }
 
-    IEnumerator Shoot()
+    private IEnumerator Shoot()
     {
         while (!GameManager.isGameOver)
         {
@@ -44,7 +44,7 @@ public class FirstLevelBoss : MonoBehaviour
 
     private void Fire()
     {
-        if (gameObject.activeInHierarchy)
+        if (gameObject.activeInHierarchy && GameManager.isPlayerAlive)
         {
             audio.PlayFX("Boss Enemy Shoot");
             Quaternion shootRotation = transform.rotation * Quaternion.Euler(0, 180f, 0);
