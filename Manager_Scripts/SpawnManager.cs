@@ -119,7 +119,6 @@ public class SpawnManager : MonoBehaviour
 
     private void ResetEnemyCountWhenLifeLost()
         => enemyCount = enemyCount - 2 > 2 ? enemyCount - 2 : 2;
-
      
     private void RestartBossFight()
     {

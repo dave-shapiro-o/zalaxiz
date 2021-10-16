@@ -24,13 +24,14 @@ public sealed class GameManager : MonoBehaviour
     public static bool isPlayerAlive;
     public static bool isPowerUp;
     public static bool isBossFight;
+    public static bool isLevelComplete;
 
+    private int bossHitCount;
     private readonly int scoreValue = 30;
+
     private int currentScore;
     internal static int hiScore;
-
     internal static int lives;
-    private int bossHitCount;
 
     public static GameManager sharedInstance;
 
@@ -79,6 +80,12 @@ public sealed class GameManager : MonoBehaviour
         isPowerUp = false;
     }
 
+    private void UpdateScore(int score)
+    {
+        currentScore += score;
+        hud.UpdateScore(currentScore);
+    }
+
     private void ActivateBossFight() => isBossFight = true;   
 
     private void EnemyIsHit(Collider enemyCollider)
@@ -86,8 +93,7 @@ public sealed class GameManager : MonoBehaviour
         enemyCollider.gameObject.SetActive(false);
         if (isPlayerAlive) 
         {
-            currentScore += scoreValue;
-            hud.UpdateScore(currentScore); 
+            UpdateScore(scoreValue); 
         }
     }
 
@@ -96,20 +102,19 @@ public sealed class GameManager : MonoBehaviour
         ++bossHitCount;
         if (bossHitCount == 20)
         {
+            isBossFight = false;
+            isLevelComplete = true;
             BossDied?.Invoke(bossCollider);
-
-            if (isPlayerAlive)
-            {
-                isBossFight = false;
-                currentScore += scoreValue * 20;
-                hud.UpdateScore(currentScore);
-            }
             bossHitCount = 0;
             bossCollider.gameObject.SetActive(false);
 
-            if (isPlayerAlive) { LevelComplete?.Invoke(); }
+            if (isPlayerAlive)
+            {
+                UpdateScore(scoreValue * 20);
+                LevelComplete?.Invoke();
+            }
         }
-        if (bossHitCount == 6) 
+        if (bossHitCount == 13) 
         {
             BossOnFire?.Invoke(bossCollider);
         }
@@ -121,7 +126,7 @@ public sealed class GameManager : MonoBehaviour
 
     private IEnumerator WaitAndRestart()
     {
-        yield return new WaitForSeconds(4);
+        yield return new WaitForSeconds(5);
         if (currentScore > hiScore) { hiScore = currentScore; }
         PlayerPrefs.SetInt("hiScore", hiScore);
         RestartGame();
@@ -134,40 +139,33 @@ public sealed class GameManager : MonoBehaviour
         player.SetActive(false);
         isPowerUp = false;
 
-        if (lives == 0) 
-        {
-            StartCoroutine(nameof(OnAllLivesLost));
-        }
-        else
-        {
-            StartCoroutine(nameof(OnLifeLost));
-        }
+        if (lives == 0) { OnAllLivesLost(); }
+        else { StartCoroutine(nameof(OnLifeLost)); }
     }
 
-    private IEnumerator OnAllLivesLost()
+    private void OnAllLivesLost()
     {
         AllLivesLost?.Invoke();
-        isGameOver = true;      
-        yield return new WaitForSeconds(6);
-        if (currentScore > hiScore) { hiScore = currentScore; }
-        PlayerPrefs.SetInt("hiScore", hiScore);
-        RestartGame();
+        StartCoroutine(nameof(WaitAndRestart));
     }
 
     private IEnumerator OnLifeLost()
     {
         LifeLost?.Invoke();
-        yield return new WaitForSeconds(4);
-        player.SetActive(true);
-        player.transform.position = new Vector3(0, 0, 0);
-        isPlayerAlive = true;
-
-        if (isBossFight) 
+        if (!isLevelComplete)
         {
-            bossHitCount = 20;
-            ContinueBossFight?.Invoke();
-        }
-        else { Continue?.Invoke(); }      
+            yield return new WaitForSeconds(4);
+            player.SetActive(true);
+            player.transform.position = new Vector3(0, 0, 0);
+            isPlayerAlive = true;
+
+            if (isBossFight)
+            {
+                bossHitCount = 0;
+                ContinueBossFight?.Invoke();
+            }
+            else { Continue?.Invoke(); }
+        }           
     }
 
     private void RestartGame() 
@@ -198,4 +196,13 @@ public sealed class GameManager : MonoBehaviour
         StartScreen -= ActivateStartScreen;
         LevelComplete -= LevelIsComplete;
     }
+    //public class EnemyArgs<T> : EventArgs
+    //{
+    //    public T Value { get; private set; }
+
+    //    public EnemyArgs(T val)
+    //    {
+    //        Value = val;
+    //    }
+    //}
 }

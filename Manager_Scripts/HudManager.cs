@@ -47,7 +47,7 @@ public class HudManager : MonoBehaviour
 
     private void ActivateGameOverScreen()
     {
-        gameOverText.gameObject.SetActive(true);
+        if (!GameManager.isLevelComplete) { gameOverText.gameObject.SetActive(true); }
         livesDisplay.SetActive(false);
     }
 
