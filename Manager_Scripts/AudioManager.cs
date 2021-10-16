@@ -57,6 +57,7 @@ public class AudioManager : MonoBehaviour
         };
         if(clip != null) { fxAudioSource.PlayOneShot(clip); }        
     }
+
     private void PlayStartScreenMusic()
         => Play("Game Over");
 

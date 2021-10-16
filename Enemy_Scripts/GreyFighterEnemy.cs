@@ -34,6 +34,7 @@ public class GreyFighterEnemy : MonoBehaviour
             }                    
         }
     }
+
     // Update is called once per frame
     void FixedUpdate()
     {

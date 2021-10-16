@@ -57,6 +57,7 @@ public sealed class GameManager : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player");
         player.SetActive(false);
     }
+
     internal void Play()
     {
         PlayGame?.Invoke();

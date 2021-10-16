@@ -46,10 +46,12 @@ public class SpawnManager : MonoBehaviour
             (randomPowerX, 1.5F, randomPowerZ), Quaternion.identity);
         powerUp.SetActive(false);
     }
+
     internal void DeactivatePowerUp()
     { 
         powerUp.SetActive(false);
     } 
+
     internal void StartInvoke()
     {
         InvokeRepeating(nameof(SpawnEnemy), startDelay, spawnDelay);
