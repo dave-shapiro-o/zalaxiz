@@ -196,13 +196,4 @@ public sealed class GameManager : MonoBehaviour
         StartScreen -= ActivateStartScreen;
         LevelComplete -= LevelIsComplete;
     }
-    //public class EnemyArgs<T> : EventArgs
-    //{
-    //    public T Value { get; private set; }
-
-    //    public EnemyArgs(T val)
-    //    {
-    //        Value = val;
-    //    }
-    //}
 }
