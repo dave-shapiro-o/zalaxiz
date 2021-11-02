@@ -6,3 +6,9 @@ This is not a complete Unity Project! Only the C# scripts for reference.
 
 It's very much a work in progress - there is only one level for now, which just repeats.
 
+Play the WebGL browser version or download the desktop version at
+
+https://nastydave.itch.io/zalaxiz
+
+
+
